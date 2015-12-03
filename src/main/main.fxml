@@ -81,11 +81,17 @@
                                     <children>
                                         <Button alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false"
                                                 onAction="#beginTraceroute" text="Go"/>
+                                        <Separator prefWidth="200.0" visible="false" HBox.hgrow="ALWAYS"/>
+                                        <Button fx:id="button_stop" cancelButton="true" disable="true"
+                                                mnemonicParsing="false" onAction="#stopTraceroute" text="Stop"/>
                                     </children>
                                     <padding>
                                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                                     </padding>
                                 </HBox>
+                                <Separator prefWidth="200.0"/>
+                                <Separator orientation="VERTICAL" prefHeight="200.0" visible="false"
+                                           VBox.vgrow="ALWAYS"/>
                                 <Separator prefWidth="200.0"/>
                                 <HBox layoutX="10.0" layoutY="161.0" spacing="5.0">
                                     <children>

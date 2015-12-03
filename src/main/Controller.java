@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -29,38 +30,14 @@ public class Controller implements Initializable {
     Label label_errbuf;
     @FXML
     Label label_status;
+    @FXML
+    Button button_stop;
 
     private List<PcapIf> alldevs = new ArrayList<>(); // Filled with devices
     private StringBuilder errbuf = new StringBuilder(); // Error messages
     private ObservableList<String> devices = FXCollections.observableArrayList(); // Dynamic list of devices
+    private Pcap pcap;
     private PcapIf pcap_selected_device;
-
-    public void getDevices() {
-        devices.removeAll();
-        int r = Pcap.findAllDevs(alldevs, errbuf);
-        if (r == Pcap.NOT_OK || alldevs.isEmpty()) {
-            label_errbuf.setText(errbuf.toString());
-        } else {
-            for (PcapIf alldev : alldevs) {
-                devices.add(alldev.getName());
-            }
-        }
-    }
-
-    public void beginTraceroute() throws IOException {
-        int snaplen = 2 * 2014; // Truncate packet at this size
-        int promiscuous = Pcap.MODE_PROMISCUOUS; // = 1
-        int timeout = 60 * 1000; // In milliseconds
-        Pcap pcap = Pcap.openLive(pcap_selected_device.getName(),
-                snaplen,
-                promiscuous,
-                timeout,
-                errbuf);
-
-        // Show error message or loading message
-        if (pcap == null) error(errbuf.toString());
-        else status("Loading...");
-    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -93,6 +70,40 @@ public class Controller implements Initializable {
         // Automatically select eth0
         if (devices.contains("eth0")) list_devices.getSelectionModel().select("eth0");
 
+    }
+
+    public void getDevices() {
+        devices.removeAll();
+        int r = Pcap.findAllDevs(alldevs, errbuf);
+        if (r == Pcap.NOT_OK || alldevs.isEmpty()) {
+            label_errbuf.setText(errbuf.toString());
+        } else {
+            for (PcapIf alldev : alldevs) {
+                devices.add(alldev.getName());
+            }
+        }
+    }
+
+    public void beginTraceroute() throws IOException {
+        button_stop.setDisable(false);
+        int snaplen = 2 * 2014; // Truncate packet at this size
+        int promiscuous = Pcap.MODE_PROMISCUOUS; // = 1
+        int timeout = 60 * 1000; // In milliseconds
+        pcap = Pcap.openLive(pcap_selected_device.getName(),
+                snaplen,
+                promiscuous,
+                timeout,
+                errbuf);
+
+        // Show error message or loading message
+        if (pcap == null) error(errbuf.toString());
+        else status("Loading...");
+    }
+
+    public void stopTraceroute() {
+        pcap.close();
+        status("Connection closed");
+        button_stop.setDisable(true);
     }
 
     private void print(String s) {
