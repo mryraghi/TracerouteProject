@@ -27,6 +27,9 @@ public class Controller implements Initializable {
     TextField destination_ip;
     @FXML
     Label label_errbuf;
+    @FXML
+    Label label_status;
+
     private List<PcapIf> alldevs = new ArrayList<>(); // Filled with devices
     private StringBuilder errbuf = new StringBuilder(); // Error messages
     private ObservableList<String> devices = FXCollections.observableArrayList(); // Dynamic list of devices
@@ -46,16 +49,17 @@ public class Controller implements Initializable {
 
     public void beginTraceroute() throws IOException {
         int snaplen = 2 * 2014; // Truncate packet at this size
-        int promiscous = Pcap.MODE_PROMISCUOUS; // = 0
+        int promiscuous = Pcap.MODE_PROMISCUOUS; // = 1
         int timeout = 60 * 1000; // In milliseconds
         Pcap pcap = Pcap.openLive(pcap_selected_device.getName(),
                 snaplen,
-                promiscous,
+                promiscuous,
                 timeout,
                 errbuf);
 
-        // Show error message
-        if (pcap == null) label_errbuf.setText(errbuf.toString());
+        // Show error message or loading message
+        if (pcap == null) error(errbuf.toString());
+        else status("Loading...");
     }
 
     @Override
@@ -78,14 +82,12 @@ public class Controller implements Initializable {
             try {
                 // Get IP from Object
                 current_ip.setText(pcap_selected_device.getAddresses().get(3).getAddr().toString().substring(7, 19));
-                System.out.println(pcap_selected_device.getAddresses());
             } catch (Exception e) {
                 current_ip.setText("No valid IP address");
-                System.out.println(e.getMessage());
             }
 
             // Reset error message
-            label_errbuf.setText("");
+            error();
         });
 
         // Automatically select eth0
@@ -95,5 +97,17 @@ public class Controller implements Initializable {
 
     private void print(String s) {
         System.out.println(s);
+    }
+
+    private void status(String s) {
+        label_status.setText(s);
+    }
+
+    private void error(String s) {
+        label_errbuf.setText(s);
+    }
+
+    private void error() {
+        label_errbuf.setText("");
     }
 }

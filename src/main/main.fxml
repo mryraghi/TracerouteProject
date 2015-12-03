@@ -87,10 +87,25 @@
                                     </padding>
                                 </HBox>
                                 <Separator prefWidth="200.0"/>
+                                <HBox layoutX="10.0" layoutY="161.0" spacing="5.0">
+                                    <children>
+                                        <Label alignment="TOP_LEFT" contentDisplay="TOP" maxWidth="50.0" minWidth="50.0"
+                                               text="Status:" HBox.hgrow="NEVER"/>
+                                        <Label fx:id="label_status" wrapText="true">
+                                            <font>
+                                                <Font name="System Bold" size="13.0"/>
+                                            </font>
+                                        </Label>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                    </padding>
+                                </HBox>
+                                <Separator layoutX="10.0" layoutY="158.0" prefWidth="200.0"/>
                                 <HBox layoutX="10.0" layoutY="47.0" spacing="5.0">
                                     <children>
                                         <Label alignment="TOP_LEFT" contentDisplay="TOP" maxWidth="37.0" minWidth="37.0"
-                                               text="Error:"/>
+                                               text="Error:" HBox.hgrow="NEVER"/>
                                         <Label fx:id="label_errbuf" textFill="RED" wrapText="true">
                                             <font>
                                                 <Font name="System Bold" size="13.0"/>
