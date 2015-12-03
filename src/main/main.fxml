@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
@@ -33,36 +33,76 @@
                         </VBox>
                     </children>
                 </AnchorPane>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0"
+                            SplitPane.resizableWithParent="false">
                     <children>
-                        <GridPane prefHeight="398.0" prefWidth="416.0" AnchorPane.bottomAnchor="0.0"
-                                  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="120.0"
-                                                   prefWidth="120.0"/>
-                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="316.0" minWidth="10.0"
-                                                   prefWidth="298.0"/>
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                                <RowConstraints maxHeight="266.0" minHeight="0.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                                <RowConstraints maxHeight="347.0" minHeight="10.0" prefHeight="325.0"
-                                                vgrow="SOMETIMES"/>
-                            </rowConstraints>
+                        <VBox prefHeight="398.0" prefWidth="416.0" AnchorPane.bottomAnchor="0.0"
+                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <children>
-                                <Label text="Selected device:"/>
-                                <Label fx:id="selected_device" GridPane.columnIndex="1">
-                                    <font>
-                                        <Font name="System Bold" size="13.0"/>
-                                    </font>
-                                </Label>
-                                <Label text="Insert an IP:" GridPane.rowIndex="1"/>
-                                <TextField GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                                <HBox alignment="CENTER_LEFT" minHeight="37.0" spacing="5.0">
+                                    <children>
+                                        <Label text="Selected device:"/>
+                                        <Label fx:id="selected_device">
+                                            <font>
+                                                <Font name="System Bold" size="13.0"/>
+                                            </font>
+                                        </Label>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                    </padding>
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT" minHeight="37.0" spacing="5.0">
+                                    <children>
+                                        <Label text="Destination IP:"/>
+                                        <Label fx:id="current_ip">
+                                            <font>
+                                                <Font name="System Bold" size="13.0"/>
+                                            </font>
+                                        </Label>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                    </padding>
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                    <children>
+                                        <Label contentDisplay="CENTER" text="Source IP:"/>
+                                        <TextField fx:id="destination_ip" HBox.hgrow="ALWAYS"/>
+                                    </children>
+                                    <VBox.margin>
+                                        <Insets/>
+                                    </VBox.margin>
+                                    <padding>
+                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                    </padding>
+                                </HBox>
+                                <HBox alignment="CENTER_RIGHT">
+                                    <children>
+                                        <Button alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false"
+                                                onAction="#beginTraceroute" text="Go"/>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                    </padding>
+                                </HBox>
+                                <Separator prefWidth="200.0"/>
+                                <HBox layoutX="10.0" layoutY="47.0" spacing="5.0">
+                                    <children>
+                                        <Label alignment="TOP_LEFT" contentDisplay="TOP" maxWidth="37.0" minWidth="37.0"
+                                               text="Error:"/>
+                                        <Label fx:id="label_errbuf" textFill="RED" wrapText="true">
+                                            <font>
+                                                <Font name="System Bold" size="13.0"/>
+                                            </font>
+                                        </Label>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                    </padding>
+                                </HBox>
                             </children>
-                            <padding>
-                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
-                            </padding>
-                        </GridPane>
+                        </VBox>
                     </children>
                 </AnchorPane>
             </items>

@@ -6,29 +6,37 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
-    List<PcapIf> alldevs = new ArrayList<>(); // Filled with devices
-    StringBuilder errbuf = new StringBuilder(); // Error messages
-    ObservableList<String> devices = FXCollections.observableArrayList(); // Dynamic list of devices
-
     @FXML
     Label selected_device;
     @FXML
     ListView<String> list_devices;
+    @FXML
+    Label current_ip;
+    @FXML
+    TextField destination_ip;
+    @FXML
+    Label label_errbuf;
+    private List<PcapIf> alldevs = new ArrayList<>(); // Filled with devices
+    private StringBuilder errbuf = new StringBuilder(); // Error messages
+    private ObservableList<String> devices = FXCollections.observableArrayList(); // Dynamic list of devices
+    private PcapIf pcap_selected_device;
 
     public void getDevices() {
         devices.removeAll();
         int r = Pcap.findAllDevs(alldevs, errbuf);
         if (r == Pcap.NOT_OK || alldevs.isEmpty()) {
-            System.err.printf("Can't read list of devices, error is %s", errbuf.toString());
+            label_errbuf.setText(errbuf.toString());
         } else {
             for (PcapIf alldev : alldevs) {
                 devices.add(alldev.getName());
@@ -36,8 +44,23 @@ public class Controller implements Initializable {
         }
     }
 
+    public void beginTraceroute() throws IOException {
+        int snaplen = 2 * 2014; // Truncate packet at this size
+        int promiscous = Pcap.MODE_PROMISCUOUS; // = 0
+        int timeout = 60 * 1000; // In milliseconds
+        Pcap pcap = Pcap.openLive(pcap_selected_device.getName(),
+                snaplen,
+                promiscous,
+                timeout,
+                errbuf);
+
+        // Show error message
+        if (pcap == null) label_errbuf.setText(errbuf.toString());
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
         // Set content to ListView from the beginning
         list_devices.setItems(devices);
 
@@ -46,12 +69,31 @@ public class Controller implements Initializable {
 
         // Selection listener
         list_devices.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-                    selected_device.setText(newValue);
-                }
-        );
+            selected_device.setText(newValue);
+
+            // Get information about device from selection
+            pcap_selected_device = alldevs.get(list_devices.getSelectionModel().getSelectedIndex());
+
+            // Set current IP
+            try {
+                // Get IP from Object
+                current_ip.setText(pcap_selected_device.getAddresses().get(3).getAddr().toString().substring(7, 19));
+                System.out.println(pcap_selected_device.getAddresses());
+            } catch (Exception e) {
+                current_ip.setText("No valid IP address");
+                System.out.println(e.getMessage());
+            }
+
+            // Reset error message
+            label_errbuf.setText("");
+        });
 
         // Automatically select eth0
         if (devices.contains("eth0")) list_devices.getSelectionModel().select("eth0");
 
+    }
+
+    private void print(String s) {
+        System.out.println(s);
     }
 }
