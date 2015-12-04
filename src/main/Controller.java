@@ -10,9 +10,16 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
+import org.jnetpcap.packet.JMemoryPacket;
+import org.jnetpcap.packet.JPacket;
+import org.jnetpcap.protocol.JProtocol;
 
 import java.io.IOException;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URL;
+import java.net.UnknownHostException;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -32,11 +39,14 @@ public class Controller implements Initializable {
     Label label_status;
     @FXML
     Button button_stop;
+    @FXML
+    Label current_mac_address;
 
     private List<PcapIf> alldevs = new ArrayList<>(); // Filled with devices
     private StringBuilder errbuf = new StringBuilder(); // Error messages
     private ObservableList<String> devices = FXCollections.observableArrayList(); // Dynamic list of devices
     private Pcap pcap;
+    private NetworkInterface network;
     private PcapIf pcap_selected_device;
 
     @Override
@@ -63,6 +73,31 @@ public class Controller implements Initializable {
                 current_ip.setText("No valid IP address");
             }
 
+            //Set current MAC address
+            try {
+                // Get the network interface as an Object
+                // from a string, which is the name of
+                // the selected device
+                network = NetworkInterface.getByName(newValue);
+
+                if (network != null && network.getHardwareAddress() != null) {
+                    // Format MAC address
+                    byte[] mac_format = network.getHardwareAddress();
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < mac_format.length; i++) {
+                        sb.append(String.format("%02X%s", mac_format[i], (i < mac_format.length - 1) ? "-" : ""));
+                    }
+
+                    // Set text
+                    current_mac_address.setText(sb.toString());
+                } else {
+                    current_mac_address.setText("No valid MAC address");
+                }
+
+            } catch (SocketException e) {
+                error(e.getMessage());
+            }
+
             // Reset error message
             error();
         });
@@ -85,7 +120,9 @@ public class Controller implements Initializable {
     }
 
     public void beginTraceroute() throws IOException {
-        int snaplen = 2 * 2014; // Truncate packet at this size
+        int snaplen = 64 * 2014; // Truncate packet at this size
+        // MODE_NON_PROMISCUOUS: sniffs only traffic that is directly related to it.
+        // Only traffic to, from, or routed through the host will be picked up by the sniffer.
         int promiscuous = Pcap.MODE_PROMISCUOUS; // = 1
         int timeout = 60 * 1000; // In milliseconds
         pcap = Pcap.openLive(pcap_selected_device.getName(),
@@ -101,13 +138,48 @@ public class Controller implements Initializable {
             list_devices.setDisable(true);
             button_stop.setDisable(false);
         }
+
+        // Example data
+        byte[] packet_data = "Hello".getBytes();
+
+        // Check given IP and send packet
+        if (!destination_ip.getText().isEmpty()) sendPacket(packet_data);
+
     }
 
-    public void stopTraceroute() {
+    private void sendPacket(byte[] data) {
+        int dataLength = data.length;
+
+        // Ethernet header (14) + IP v4 header (20) + UDP header (8)
+        int packetSize = dataLength + 32;
+        JPacket packet = new JMemoryPacket(packetSize);
+
+        // ByteOrder.BIG_ENDIAN means that
+        // bites are read in an increasing order
+        packet.order(ByteOrder.BIG_ENDIAN);
+
+        // 0x0800 is the EtherType
+        // It refers to: Internet Protocol version 4 (IPv4)
+        packet.setUShort(12, 0x0800);
+        packet.scan(JProtocol.ETHERNET_ID);
+
+        /*Ethernet ethernet = packet.getHeader(new Ethernet());
+        ethernet.source(sourceMacAddress);
+        ethernet.destination(destinationMacAddress);
+        ethernet.checksum(ethernet.calculateChecksum());*/
+    }
+
+    public void stopTraceroute() throws UnknownHostException, SocketException {
         pcap.close();
         status("Connection closed");
         button_stop.setDisable(true);
         list_devices.setDisable(false);
+        byte[] mac = network.getHardwareAddress();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mac.length; i++) {
+            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+        }
+        print(sb.toString());
     }
 
     private void print(String s) {
