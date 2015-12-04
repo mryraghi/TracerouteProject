@@ -13,6 +13,7 @@ import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.JMemoryPacket;
 import org.jnetpcap.packet.JPacket;
 import org.jnetpcap.protocol.JProtocol;
+import org.jnetpcap.protocol.lan.Ethernet;
 
 import java.io.IOException;
 import java.net.NetworkInterface;
@@ -85,7 +86,7 @@ public class Controller implements Initializable {
                     byte[] mac_format = network.getHardwareAddress();
                     StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < mac_format.length; i++) {
-                        sb.append(String.format("%02X%s", mac_format[i], (i < mac_format.length - 1) ? "-" : ""));
+                        sb.append(String.format("%02X%s", mac_format[i], (i < mac_format.length - 1) ? ":" : ""));
                     }
 
                     // Set text
@@ -104,7 +105,6 @@ public class Controller implements Initializable {
 
         // Automatically select eth0
         if (devices.contains("eth0")) list_devices.getSelectionModel().select("eth0");
-
     }
 
     public void getDevices() {
@@ -144,10 +144,9 @@ public class Controller implements Initializable {
 
         // Check given IP and send packet
         if (!destination_ip.getText().isEmpty()) sendPacket(packet_data);
-
     }
 
-    private void sendPacket(byte[] data) {
+    private void sendPacket(byte[] data) throws SocketException {
         int dataLength = data.length;
 
         // Ethernet header (14) + IP v4 header (20) + UDP header (8)
@@ -163,10 +162,21 @@ public class Controller implements Initializable {
         packet.setUShort(12, 0x0800);
         packet.scan(JProtocol.ETHERNET_ID);
 
-        /*Ethernet ethernet = packet.getHeader(new Ethernet());
-        ethernet.source(sourceMacAddress);
-        ethernet.destination(destinationMacAddress);
-        ethernet.checksum(ethernet.calculateChecksum());*/
+        Ethernet ethernet = packet.getHeader(new Ethernet());
+        ethernet.source(network.getHardwareAddress());
+
+        // Destination MAC address still needs to be defined
+        // Left blank intentionally
+        ethernet.destination();
+
+        // From Wireshark documentation:
+        // Checksums are used to ensure the integrity of
+        // data portions for data transmission or storage.
+        // A checksum is basically a calculated summary of such a data portion.
+        ethernet.checksum(ethernet.calculateChecksum());
+
+
+        // IPv4 and UDP packets are missing.....
     }
 
     public void stopTraceroute() throws UnknownHostException, SocketException {
@@ -174,12 +184,6 @@ public class Controller implements Initializable {
         status("Connection closed");
         button_stop.setDisable(true);
         list_devices.setDisable(false);
-        byte[] mac = network.getHardwareAddress();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < mac.length; i++) {
-            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
-        }
-        print(sb.toString());
     }
 
     private void print(String s) {
