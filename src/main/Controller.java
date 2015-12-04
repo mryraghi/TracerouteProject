@@ -85,7 +85,6 @@ public class Controller implements Initializable {
     }
 
     public void beginTraceroute() throws IOException {
-        button_stop.setDisable(false);
         int snaplen = 2 * 2014; // Truncate packet at this size
         int promiscuous = Pcap.MODE_PROMISCUOUS; // = 1
         int timeout = 60 * 1000; // In milliseconds
@@ -97,13 +96,18 @@ public class Controller implements Initializable {
 
         // Show error message or loading message
         if (pcap == null) error(errbuf.toString());
-        else status("Loading...");
+        else {
+            status("Loading...");
+            list_devices.setDisable(true);
+            button_stop.setDisable(false);
+        }
     }
 
     public void stopTraceroute() {
         pcap.close();
         status("Connection closed");
         button_stop.setDisable(true);
+        list_devices.setDisable(false);
     }
 
     private void print(String s) {

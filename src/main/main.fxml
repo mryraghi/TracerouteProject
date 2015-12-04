@@ -112,7 +112,7 @@
                                     <children>
                                         <Label alignment="TOP_LEFT" contentDisplay="TOP" maxWidth="37.0" minWidth="37.0"
                                                text="Error:" HBox.hgrow="NEVER"/>
-                                        <Label fx:id="label_errbuf" textFill="RED" wrapText="true">
+                                        <Label fx:id="label_errbuf" textFill="RED" wrapText="true" HBox.hgrow="NEVER">
                                             <font>
                                                 <Font name="System Bold" size="13.0"/>
                                             </font>
