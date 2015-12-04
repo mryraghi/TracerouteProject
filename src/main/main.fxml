@@ -93,8 +93,8 @@
                                 </HBox>
                                 <HBox alignment="CENTER_RIGHT">
                                     <children>
-                                        <Button alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false"
-                                                onAction="#beginTraceroute" text="Go"/>
+                                        <Button fx:id="button_start" alignment="CENTER_RIGHT" contentDisplay="RIGHT"
+                                                mnemonicParsing="false" onAction="#beginTraceroute" text="Start"/>
                                         <Separator prefWidth="200.0" visible="false" HBox.hgrow="ALWAYS"/>
                                         <Button fx:id="button_stop" cancelButton="true" disable="true"
                                                 mnemonicParsing="false" onAction="#stopTraceroute" text="Stop"/>
