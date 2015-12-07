@@ -1,8 +1,12 @@
 
 import socket
 import struct
+import requests # this module has to be installed from outside python's built-in modules
+import sys
 
 class Traceroute:
+
+    FREEGEOPIP_URL = 'http://freegeoip.net/json/'
 
     def __init__(self, dest_name, port=33434, max_hops=30, ttl=1):
         self.dest_name = dest_name
@@ -48,6 +52,26 @@ class Traceroute:
         else:
             self.curr_host = "*"
 
+    def get_geolocation_for_ip(self, ip):
+
+        url = '{}/{}'.format(self.FREEGEOPIP_URL, ip)
+
+        try:
+            response = requests.get(url)
+
+            if response.status_code == 200:
+                return response.json()
+            elif response.status_code == 403:
+                print '403 - forbidden error'
+                sys.exit()
+            else:
+                print 'something went wrong'
+                sys.exit()
+
+        except requests.exceptions.ConnectionError:
+            print 'check network connection'
+            sys.exit()
+
     def trace(self):
         
         self.dest_addr = self.get_ip()
@@ -79,6 +103,9 @@ class Traceroute:
             self.set_curr_host()
 
             print "%d\t%s" % (self.ttl, self.curr_host)
+            print 'json file'
+            print self.get_geolocation_for_ip(self.curr_addr)
+            print '\n'
 
             self.ttl += 1
             
