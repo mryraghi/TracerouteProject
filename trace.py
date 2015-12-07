@@ -1,72 +1,93 @@
+
 import socket
 import struct
 
-def main(dest_name):
-    
-    dest_addr = socket.gethostbyname(dest_name)                                         # in case the given address is a domain
+class Traceroute:
 
-    port = 33434
-    
-    max_hops = 30
-    
-    icmp = socket.getprotobyname('icmp')
-    udp = socket.getprotobyname('udp')
-    
-    ttl = 1
-    timeout = struct.pack("ll", 5, 0)
+    def __init__(self, dest_name, port=33434, max_hops=30, ttl=1):
+        self.dest_name = dest_name
+        self.port = port
+        self.max_hops = max_hops
+        self.ttl = ttl
+        self.curr_addr = None
+        self.curr_name = None
 
-    while True:
-        
-        # creating sockets
-        recv_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, icmp)
-        send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, udp)
-        
-        # setting ttl and timeout for receiving socket (to behave more like a traceroute prompt command)
-        send_socket.setsockopt(socket.SOL_IP, socket.IP_TTL, ttl)
-        recv_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, timeout)
-        
-        # setting receiving soket to listen to a specific port
-        recv_socket.bind(("", port))
-        # sending to destination host using the same port
-        send_socket.sendto("", (dest_name, port))
-        
-        curr_addr = None
-        curr_name = None
-        
+    def get_ip(self):
+        return socket.gethostbyname(self.dest_name)
+
+    def getting_protocols(self, proto1, proto2):
+        return socket.getprotobyname(proto1), socket.getprotobyname(proto2)
+
+    def create_sockets(self):
+            return socket.socket(socket.AF_INET, socket.SOCK_RAW, self.icmp), socket.socket(socket.AF_INET, socket.SOCK_DGRAM, self.udp)
+
+    def set_sockets(self):
+
+        self.send_socket.setsockopt(socket.SOL_IP, socket.IP_TTL, self.ttl)
+        self.recv_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, self.timeout)
+
+        self.recv_socket.bind(("", self.port))
+        self.send_socket.sendto("", (self.dest_name, self.port))
+
+    def get_hostname(self):
+        # trying to get the hostname
         try:
-            # getting data from receiving socket
-            _, curr_addr = recv_socket.recvfrom(512)
-            # _ is the data and curr_addr is a tuple with ip address and port, we care only for the first one
-            curr_addr = curr_addr[0]
-            
-            # trying to get the hostname
-            try:
-                curr_name = socket.gethostbyaddr(curr_addr)[0]
-            
-            except socket.error:
-                curr_name = curr_addr
+            self.curr_name = socket.gethostbyaddr(self.curr_addr)[0]
         
         except socket.error:
-            pass
-        
-        finally:
-            send_socket.close()
-            recv_socket.close()
+            self.curr_name = self.curr_addr
 
+    def close_sockets(self):
+        self.send_socket.close()
+        self.recv_socket.close()
+
+    def set_curr_host(self):
         # manipulating prints
-        if curr_addr is not None:
-            curr_host = "%s (%s)" % (curr_name, curr_addr)
+        if self.curr_addr is not None:
+            self.curr_host = "%s (%s)" % (self.curr_name, self.curr_addr)
         else:
-            curr_host = "*"
-        
-        print "%d\t%s" % (ttl, curr_host)
+            self.curr_host = "*"
 
-        ttl += 1
+    def trace(self):
         
-        # when to stop
-        if curr_addr == dest_addr or ttl > max_hops:
-            break
+        self.dest_addr = self.get_ip()
 
-if __name__ == "__main__":
-    #main('google.com')
-    main('allspice.lcs.mit.edu')
+        self.icmp, self.udp = self.getting_protocols('icmp', 'udp')
+
+        self.timeout = struct.pack("ll", 5, 0)
+
+        while True:
+
+            self.recv_socket, self.send_socket = self.create_sockets()
+
+            self.set_sockets()
+
+            try:
+                # getting data from receiving socket
+                _, self.curr_addr = self.recv_socket.recvfrom(512)
+                # _ is the data and curr_addr is a tuple with ip address and port, we care only for the first one
+                self.curr_addr = self.curr_addr[0]
+
+                self.get_hostname()
+            
+            except socket.error:
+                pass
+            
+            finally:
+                self.close_sockets()
+
+            self.set_curr_host()
+
+            print "%d\t%s" % (self.ttl, self.curr_host)
+
+            self.ttl += 1
+            
+            # when to stop
+            if self.curr_addr == self.dest_addr or self.ttl > self.max_hops:
+                break
+
+
+
+x = Traceroute('allspice.lcs.mit.edu')
+
+x.trace()
