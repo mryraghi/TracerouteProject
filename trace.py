@@ -1,7 +1,7 @@
 
 import socket
 import struct
-import requests # this module has to be installed from outside python's built-in modules
+# import requests # this module has to be installed from outside python's built-in modules
 import sys
 
 class Traceroute:
@@ -47,33 +47,31 @@ class Traceroute:
         self.recv_socket.close()
 
     def set_curr_host(self):
-        # manipulating prints
+        # manipulating hostnames
         if self.curr_addr is not None:
             self.route_list.append([self.ttl, self.curr_name, self.curr_addr])
-            #self.curr_host = "%s (%s)" % (self.curr_name, self.curr_addr)
         else:
             self.route_list.append([0, "Unreachable", "Unreachable"])
-            #self.curr_host = "*"
 
-    def get_geolocation_for_ip(self, ip):
+    # def get_geolocation_for_ip(self, ip):
 
-        url = '{}/{}'.format(self.FREEGEOPIP_URL, ip)
+    #     url = '{}/{}'.format(self.FREEGEOPIP_URL, ip)
 
-        try:
-            response = requests.get(url)
+    #     try:
+    #         response = requests.get(url)
 
-            if response.status_code == 200:
-                return response.json()
-            elif response.status_code == 403:
-                print '403 - forbidden error'
-                sys.exit()
-            else:
-                print 'something went wrong'
-                sys.exit()
+    #         if response.status_code == 200:
+    #             return response.json()
+    #         elif response.status_code == 403:
+    #             print '403 - forbidden error'
+    #             sys.exit()
+    #         else:
+    #             print 'something went wrong'
+    #             sys.exit()
 
-        except requests.exceptions.ConnectionError:
-            print 'check network connection'
-            sys.exit()
+    #     except requests.exceptions.ConnectionError:
+    #         print 'check network connection'
+    #         sys.exit()
 
     def trace(self):
         
@@ -105,17 +103,16 @@ class Traceroute:
 
             self.set_curr_host()
 
-            #print "%d\t%s" % (self.ttl, self.curr_host)
-            #print 'json file'
-            #print self.get_geolocation_for_ip(self.curr_addr)
-            #print '\n'
-
             self.ttl += 1
             
             # when to stop
             if self.curr_addr == self.dest_addr or self.ttl > self.max_hops:
                 break
 
+        print 'before'
+        print self.route_list
+
+        print 'after'
         return self.manipulate_list()
 
     def manipulate_list(self):
@@ -130,16 +127,26 @@ class Traceroute:
 
         # removing duplicates
         for x in self.route_list:
-            if x not in final_list:
+            if x not in final_list and x[0] != 0:
                 final_list.append(x)
 
-        for i in range(1, len(final_list) + 1):
-            final_list[i - 1][0] = i
+        for x in range(1, len(final_list) + 1):
+            final_list[x - 1][0] = x
 
         return final_list
 
+    def write_txt(self, list_to_write):
+        f = open("route.txt", "w")
+        for x in list_to_write:
+            f.write("hop:" + str(x[0]) + ",hostname:" + x[1] + ",ip:" + x[2] + "\n")
+        f.close()
+
 x = Traceroute('allspice.lcs.mit.edu')
+
+#x = Traceroute('google.com')
 
 route = x.trace()
 
 print route
+
+x.write_txt(route)
