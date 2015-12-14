@@ -8,8 +8,8 @@ class Traceroute:
 
     FREEGEOPIP_URL = 'http://freegeoip.net/json/'
 
-    def __init__(self, dest_name, port=33434, max_hops=30, ttl=1):
-        self.dest_name = dest_name
+    def __init__(self, sysArgs, port=33434, max_hops=30, ttl=1):
+        self.dest_name = str(sysArgs[1])
         self.port = port
         self.max_hops = max_hops
         self.ttl = ttl
@@ -109,10 +109,10 @@ class Traceroute:
             if self.curr_addr == self.dest_addr or self.ttl > self.max_hops:
                 break
 
-        print 'before'
-        print self.route_list
+        #print 'before'
+        #print self.route_list
 
-        print 'after'
+        #print 'after'
         return self.manipulate_list()
 
     def manipulate_list(self):
@@ -135,18 +135,19 @@ class Traceroute:
 
         return final_list
 
-    def write_txt(self, list_to_write):
-        f = open("route.txt", "w")
-        for x in list_to_write:
-            f.write("hop:" + str(x[0]) + ",hostname:" + x[1] + ",ip:" + x[2] + "\n")
-        f.close()
+    # def write_txt(self, list_to_write):
+    #     f = open("route.txt", "w")
+    #     for x in list_to_write:
+    #         f.write("hop:" + str(x[0]) + ",hostname:" + x[1] + ",ip:" + x[2] + "\n")
+    #     f.close()
 
-x = Traceroute('allspice.lcs.mit.edu')
+#x = Traceroute('allspice.lcs.mit.edu',sys.argv)
+
+x = Traceroute(sys.argv)
 
 #x = Traceroute('google.com')
 
 route = x.trace()
 
-print route
-
-x.write_txt(route)
+for i in route:
+    print i
