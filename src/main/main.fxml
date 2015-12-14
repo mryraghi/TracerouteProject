@@ -103,9 +103,7 @@
                                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                                     </padding>
                                 </HBox>
-                                <Separator prefWidth="200.0"/>
-                                <Separator orientation="VERTICAL" prefHeight="200.0" visible="false"
-                                           VBox.vgrow="ALWAYS"/>
+                                <ListView fx:id="list_results" prefHeight="183.0" prefWidth="416.0"/>
                                 <Separator prefWidth="200.0"/>
                                 <HBox layoutX="10.0" layoutY="161.0" spacing="5.0">
                                     <children>
