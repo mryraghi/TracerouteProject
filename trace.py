@@ -1,12 +1,9 @@
 
 import socket
 import struct
-# import requests # this module has to be installed from outside python's built-in modules
 import sys
 
 class Traceroute:
-
-    FREEGEOPIP_URL = 'http://freegeoip.net/json/'
 
     def __init__(self, sysArgs, port=33434, max_hops=30, ttl=1):
         self.dest_name = str(sysArgs[1])
@@ -15,7 +12,8 @@ class Traceroute:
         self.ttl = ttl
         self.curr_addr = None
         self.curr_name = None
-        self.route_list = []
+        self.last_printed = [0, "", ""]
+        self.hop_number = 0
 
     def get_ip(self):
         return socket.gethostbyname(self.dest_name)
@@ -38,7 +36,6 @@ class Traceroute:
         # trying to get the hostname
         try:
             self.curr_name = socket.gethostbyaddr(self.curr_addr)[0]
-        
         except socket.error:
             self.curr_name = self.curr_addr
 
@@ -46,35 +43,14 @@ class Traceroute:
         self.send_socket.close()
         self.recv_socket.close()
 
-    def set_curr_host(self):
-        # manipulating hostnames
-        if self.curr_addr is not None:
-            self.route_list.append([self.ttl, self.curr_name, self.curr_addr])
-        else:
-            self.route_list.append([0, "Unreachable", "Unreachable"])
-
-    # def get_geolocation_for_ip(self, ip):
-
-    #     url = '{}/{}'.format(self.FREEGEOPIP_URL, ip)
-
-    #     try:
-    #         response = requests.get(url)
-
-    #         if response.status_code == 200:
-    #             return response.json()
-    #         elif response.status_code == 403:
-    #             print '403 - forbidden error'
-    #             sys.exit()
-    #         else:
-    #             print 'something went wrong'
-    #             sys.exit()
-
-    #     except requests.exceptions.ConnectionError:
-    #         print 'check network connection'
-    #         sys.exit()
+    def print_curr_hop(self):
+        # manipulating prints
+        if self.curr_addr is not None and self.curr_addr != self.last_printed[2]:
+            self.hop_number += 1
+            print [self.hop_number, self.curr_name, self.curr_addr]
+            self.last_printed = [self.hop_number, self.curr_name, self.curr_addr]
 
     def trace(self):
-        
         self.dest_addr = self.get_ip()
 
         self.icmp, self.udp = self.getting_protocols('icmp', 'udp')
@@ -101,7 +77,7 @@ class Traceroute:
             finally:
                 self.close_sockets()
 
-            self.set_curr_host()
+            self.print_curr_hop()
 
             self.ttl += 1
             
@@ -109,45 +85,10 @@ class Traceroute:
             if self.curr_addr == self.dest_addr or self.ttl > self.max_hops:
                 break
 
-        #print 'before'
-        #print self.route_list
-
-        #print 'after'
-        return self.manipulate_list()
-
-    def manipulate_list(self):
-
-        final_list = []
-
-        # making equal IP turn to be equal elements inside the array
-        for x in range(0, len(self.route_list)):
-            for y in range(x, len(self.route_list)):
-                if self.route_list[x][2] == self.route_list[y][2]:
-                    self.route_list[y][0] = self.route_list[x][0]
-
-        # removing duplicates
-        for x in self.route_list:
-            if x not in final_list and x[0] != 0:
-                final_list.append(x)
-
-        for x in range(1, len(final_list) + 1):
-            final_list[x - 1][0] = x
-
-        return final_list
-
-    # def write_txt(self, list_to_write):
-    #     f = open("route.txt", "w")
-    #     for x in list_to_write:
-    #         f.write("hop:" + str(x[0]) + ",hostname:" + x[1] + ",ip:" + x[2] + "\n")
-    #     f.close()
-
-#x = Traceroute('allspice.lcs.mit.edu',sys.argv)
 
 x = Traceroute(sys.argv)
 
-#x = Traceroute('google.com')
+x.trace()
 
-route = x.trace()
 
-for i in route:
-    print i
+
