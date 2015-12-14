@@ -1,0 +1,8 @@
+hop:1,hostname:10.212.0.1,ip:10.212.0.1
+hop:2,hostname:10.0.10.1,ip:10.0.10.1
+hop:3,hostname:100.43.24.2,ip:100.43.24.2
+hop:4,hostname:ge-7-16.car2.Charlotte1.Level3.net,ip:4.71.126.157
+hop:5,hostname:backbone-rtr-1-dmz-rtr-1.mit.edu,ip:18.192.1.2
+hop:6,hostname:helicon-ext.trantor.csail.mit.edu,ip:128.30.13.6
+hop:7,hostname:asperta.helicon.csail.mit.edu,ip:128.30.0.246
+hop:8,hostname:mercury.lcs.mit.edu,ip:18.26.0.122
