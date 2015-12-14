@@ -15,6 +15,7 @@ class Traceroute:
         self.ttl = ttl
         self.curr_addr = None
         self.curr_name = None
+        self.route_list = []
 
     def get_ip(self):
         return socket.gethostbyname(self.dest_name)
@@ -23,7 +24,7 @@ class Traceroute:
         return socket.getprotobyname(proto1), socket.getprotobyname(proto2)
 
     def create_sockets(self):
-            return socket.socket(socket.AF_INET, socket.SOCK_RAW, self.icmp), socket.socket(socket.AF_INET, socket.SOCK_DGRAM, self.udp)
+        return socket.socket(socket.AF_INET, socket.SOCK_RAW, self.icmp), socket.socket(socket.AF_INET, socket.SOCK_DGRAM, self.udp)
 
     def set_sockets(self):
 
@@ -48,9 +49,11 @@ class Traceroute:
     def set_curr_host(self):
         # manipulating prints
         if self.curr_addr is not None:
-            self.curr_host = "%s (%s)" % (self.curr_name, self.curr_addr)
+            self.route_list.append([self.ttl, self.curr_name, self.curr_addr])
+            #self.curr_host = "%s (%s)" % (self.curr_name, self.curr_addr)
         else:
-            self.curr_host = "*"
+            self.route_list.append([0, "Unreachable", "Unreachable"])
+            #self.curr_host = "*"
 
     def get_geolocation_for_ip(self, ip):
 
@@ -102,10 +105,10 @@ class Traceroute:
 
             self.set_curr_host()
 
-            print "%d\t%s" % (self.ttl, self.curr_host)
-            print 'json file'
-            print self.get_geolocation_for_ip(self.curr_addr)
-            print '\n'
+            #print "%d\t%s" % (self.ttl, self.curr_host)
+            #print 'json file'
+            #print self.get_geolocation_for_ip(self.curr_addr)
+            #print '\n'
 
             self.ttl += 1
             
@@ -113,8 +116,30 @@ class Traceroute:
             if self.curr_addr == self.dest_addr or self.ttl > self.max_hops:
                 break
 
+        return self.manipulate_list()
 
+    def manipulate_list(self):
+
+        final_list = []
+
+        # making equal IP turn to be equal elements inside the array
+        for x in range(0, len(self.route_list)):
+            for y in range(x, len(self.route_list)):
+                if self.route_list[x][2] == self.route_list[y][2]:
+                    self.route_list[y][0] = self.route_list[x][0]
+
+        # removing duplicates
+        for x in self.route_list:
+            if x not in final_list:
+                final_list.append(x)
+
+        for i in range(1, len(final_list) + 1):
+            final_list[i - 1][0] = i
+
+        return final_list
 
 x = Traceroute('allspice.lcs.mit.edu')
 
-x.trace()
+route = x.trace()
+
+print route
