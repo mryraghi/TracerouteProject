@@ -10,19 +10,14 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
-import org.jnetpcap.packet.JMemoryPacket;
-import org.jnetpcap.packet.JPacket;
-import org.jnetpcap.protocol.JProtocol;
-import org.jnetpcap.protocol.lan.Ethernet;
-import org.jnetpcap.protocol.network.Ip4;
-import org.jnetpcap.protocol.tcpip.Udp;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -46,10 +41,13 @@ public class Controller implements Initializable {
     Button button_stop;
     @FXML
     Button button_start;
+    @FXML
+    ListView<String> list_results;
 
     private List<PcapIf> alldevs = new ArrayList<>(); // Filled with devices
     private StringBuilder errbuf = new StringBuilder(); // Error messages
     private ObservableList<String> devices = FXCollections.observableArrayList(); // Dynamic list of devices
+    private ObservableList<String> traceroute = FXCollections.observableArrayList(); // Dynamic list of nodes
     private Pcap pcap;
     private NetworkInterface network;
     private PcapIf pcap_selected_device;
@@ -60,6 +58,7 @@ public class Controller implements Initializable {
 
         // Set content to ListView from the beginning
         list_devices.setItems(devices);
+        list_results.setItems(traceroute);
 
         // Show devices from the beginning
         this.getDevices();
@@ -127,10 +126,11 @@ public class Controller implements Initializable {
     }
 
     public void beginTraceroute() throws IOException {
-        // Disable start button
-        button_start.setDisable(true);
 
-        int snaplen = 64 * 2014; // Truncate packet at this size
+        // Disable start button
+        // button_start.setDisable(true);
+
+        /*int snaplen = 64 * 2014; // Truncate packet at this size
         // MODE_NON_PROMISCUOUS: sniffs only traffic that is directly related to it.
         // Only traffic to, from, or routed through the host will be picked up by the sniffer.
         int promiscuous = Pcap.MODE_PROMISCUOUS; // = 1
@@ -142,11 +142,14 @@ public class Controller implements Initializable {
                 errbuf);
 
         // Show error message or loading message
-        if (pcap == null) {
+        if (pcap == null)
+
+        {
             error(errbuf.toString());
             return;
-        }
-        else {
+        } else
+
+        {
             status("Loading...");
             list_devices.setDisable(true);
             button_stop.setDisable(false);
@@ -156,96 +159,23 @@ public class Controller implements Initializable {
         byte[] packet_data = "Hello".getBytes();
 
         // Check given IP and send packet
-        if (!destination_ip.getText().isEmpty()) sendPacket(packet_data);
-    }
+        // if (!destination_ip.getText().isEmpty()) sendPacket(packet_data);*/
 
-    private void sendPacket(byte[] data) throws SocketException, UnknownHostException {
-        status("Sending packet...");
 
-        int dataLength = data.length;
+        try {
+            ProcessBuilder pd = new ProcessBuilder("sudo", "python", "trace.py", destination_ip.getText());
+            Process p = pd.start();
+            BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
-        // Ethernet header (14) + IP v4 header (20) + UDP header (8)
-        int packetSize = dataLength + 32;
-        JPacket packet = new JMemoryPacket(packetSize);
+            for (String line = in.readLine(); line != null; line = in.readLine()) {
+                traceroute.add(line);
+            }
 
-        // ByteOrder.BIG_ENDIAN means that
-        // bites are read in an increasing order
-        packet.order(ByteOrder.BIG_ENDIAN);
+            in.close();
 
-        // 0x0800 is the EtherType
-        // It refers to: Internet Protocol version 4 (IPv4)
-        packet.setUShort(12, 0x0800);
-        packet.scan(JProtocol.ETHERNET_ID);
-
-        /**
-         * Ethernet packet
-         */
-
-        Ethernet ethernet = packet.getHeader(new Ethernet());
-        ethernet.source(network.getHardwareAddress());
-
-        // Destination MAC address still needs to be defined
-        // Left blank intentionally
-        ethernet.destination();
-
-        // From Wireshark documentation:
-        // Checksums are used to ensure the integrity of
-        // data portions for data transmission or storage.
-        // A checksum is basically a calculated summary of such a data portion.
-        ethernet.checksum(ethernet.calculateChecksum());
-
-        /**
-         * IPv4 packet
-         */
-
-        // setUByte(offset, value)
-        packet.setUByte(14, 0x40 | 0x05);
-        packet.scan(JProtocol.ETHERNET_ID);
-
-        // getHeader: peers the supplied header with the native
-        // header state structure and packet data buffer
-        Ip4 ip4 = packet.getHeader(new Ip4());
-
-        // Ip4.Ip4Type: table of IpTypes and their names
-        ip4.type(Ip4.Ip4Type.UDP);
-        ip4.length(packetSize - ethernet.size());
-
-        // pcap_selected_device is the Pcap Object of the selected device
-        ip4.source(pcap_selected_device.getAddresses().get(3).getAddr().getData());
-
-        // destination_ip is the textfield in which an IP is typed
-        // Gets the text from it and converts it into an array of bytes
-        ip4.destination(getByteHexArray(destination_ip.getText()));
-
-        // TODO: TTL is going to be lower in a loop
-        ip4.ttl(32);
-
-        // A setter method that changes the flag bits directly
-        // in the peered Ip4 header structure within the packet data buffer.
-        ip4.flags(0);
-        ip4.offset(0);
-
-        // Calculates a checksum using protocol specification for a header.
-        ip4.checksum(ip4.calculateChecksum());
-
-        /**
-         * UDP packet
-         */
-
-        packet.scan(JProtocol.ETHERNET_ID);
-        Udp udp = packet.getHeader(new Udp());
-        udp.source(UDP_SOURCE_PORT);
-
-        // Free ports between 33434 and 33534
-        udp.destination(33434);
-        udp.length(packetSize - ethernet.size() - ip4.size());
-        udp.checksum(udp.calculateChecksum());
-
-        // Ethernet header (14) + IP v4 header (20) + UDP header (8)
-        packet.setByteArray(32, data);
-        packet.scan(Ethernet.ID);
-
-        if (pcap.sendPacket(packet) != Pcap.OK) error(pcap.getErr());
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
     public void stopTraceroute() throws UnknownHostException, SocketException {

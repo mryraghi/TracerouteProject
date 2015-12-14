@@ -74,7 +74,6 @@ class Traceroute:
     #         sys.exit()
 
     def trace(self):
-        
         self.dest_addr = self.get_ip()
 
         self.icmp, self.udp = self.getting_protocols('icmp', 'udp')
