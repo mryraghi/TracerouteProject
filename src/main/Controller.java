@@ -3,12 +3,14 @@ package main;
 import com.lynden.gmapsfx.GoogleMapView;
 import com.lynden.gmapsfx.MapComponentInitializedListener;
 import com.lynden.gmapsfx.javascript.object.*;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 
 import java.io.BufferedReader;
@@ -20,6 +22,7 @@ import java.net.UnknownHostException;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable, MapComponentInitializedListener {
+    public GoogleMapView mapView;
     @FXML
     TextField destination_ip;
     @FXML
@@ -35,16 +38,38 @@ public class Controller implements Initializable, MapComponentInitializedListene
     @FXML
     ProgressBar progress;
     @FXML
-    private GoogleMapView mapView;
-
+    LineChart chart;
+    @FXML
+    NumberAxis yAxis;
+    @FXML
+    NumberAxis xAxis;
     private ObservableList<String> traceroute = FXCollections.observableArrayList(); // Dynamic list of nodes
+    private ObservableList<XYChart.Series<Double, Double>> series;
+    private ObservableList<XYChart.Data<Double, Double>> data;
     private Thread t;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // Set content to ListView from the beginning
         list_results.setItems(traceroute);
-        mapView = new GoogleMapView();
+
+        series = FXCollections.observableArrayList();
+
+        data = FXCollections.observableArrayList();
+        data.add(new XYChart.Data<>(0.0, 1.0));
+        data.add(new XYChart.Data<>(1.2, 1.4));
+        data.add(new XYChart.Data<>(2.2, 1.9));
+        data.add(new XYChart.Data<>(2.7, 2.3));
+        data.add(new XYChart.Data<>(2.9, 0.5));
+
+        series.add(new XYChart.Series<>("Series1", data));
+
+
+        chart = new LineChart<>(xAxis, yAxis, series);
+
+        chart.setData(data);
+
+        mapView = new GoogleMapView(true);
         mapView.addMapInializedListener(this);
     }
 
@@ -70,13 +95,13 @@ public class Controller implements Initializable, MapComponentInitializedListene
                                 traceroute.add(line);
                             }
 
-                            Platform.runLater(() -> {
-                                try {
-                                    stopTraceroute();
-                                } catch (UnknownHostException | SocketException e) {
-                                    e.printStackTrace();
-                                }
-                            });
+//                            Platform.runLater(() -> {
+//                                try {
+//                                    stopTraceroute();
+//                                } catch (UnknownHostException | SocketException e) {
+//                                    e.printStackTrace();
+//                                }
+//                            });
 
                         }
                     } catch (IOException ex) {

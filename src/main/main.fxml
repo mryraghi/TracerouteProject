@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.scene.text.*?>
-<?import com.lynden.gmapsfx.*?>
 <?import javafx.geometry.*?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="591.0" prefWidth="834.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.Controller">
+<Pane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+      minWidth="-Infinity" prefHeight="591.0" prefWidth="834.0" xmlns="http://javafx.com/javafx/8"
+      fx:controller="main.Controller">
     <children>
         <AnchorPane prefHeight="591.0" prefWidth="834.0">
             <children>
@@ -38,7 +38,14 @@
                         </HBox>
                         <HBox alignment="CENTER_RIGHT">
                             <children>
-                                <GoogleMapView fx:id="mapView" prefHeight="410.0" prefWidth="550.0" />
+                                <LineChart fx:id="chart" prefHeight="410.0" prefWidth="551.0">
+                                    <xAxis>
+                                        <NumberAxis side="BOTTOM" fx:id="xAxis"/>
+                                    </xAxis>
+                                    <yAxis>
+                                        <NumberAxis fx:id="yAxis" side="LEFT" tickLabelsVisible="false"/>
+                                    </yAxis>
+                                </LineChart>
                                 <ListView fx:id="list_results" prefHeight="410.0" prefWidth="283.0" />
                             </children>
                         </HBox>

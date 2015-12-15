@@ -21,16 +21,15 @@ import com.lynden.gmapsfx.javascript.event.MapStateEventType;
 import com.lynden.gmapsfx.javascript.object.GoogleMap;
 import com.lynden.gmapsfx.javascript.object.LatLong;
 import com.lynden.gmapsfx.javascript.object.MapOptions;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CyclicBarrier;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CyclicBarrier;
 
 /**
  *
@@ -38,12 +37,12 @@ import netscape.javascript.JSObject;
  */
 public class GoogleMapView extends AnchorPane {
 
-    protected WebView webview;
-    protected JavaFxWebEngine webengine;
-    protected boolean initialized = false;
     protected final CyclicBarrier barrier = new CyclicBarrier(2);
     protected final List<MapComponentInitializedListener> mapInitializedListeners = new ArrayList<>();
     protected final List<MapReadyListener> mapReadyListeners = new ArrayList<>();
+    protected WebView webview;
+    protected JavaFxWebEngine webengine;
+    protected boolean initialized = false;
     protected GoogleMap map;
 
     public GoogleMapView() {
@@ -138,16 +137,14 @@ public class GoogleMapView extends AnchorPane {
         webview.heightProperty().addListener(e -> mapResized());
 
         webengine.getLoadWorker().stateProperty().addListener(
-                new ChangeListener<Worker.State>() {
-                    public void changed(ObservableValue ov, Worker.State oldState, Worker.State newState) {
-                        if (newState == Worker.State.SUCCEEDED) {
-                            setInitialized(true);
-                            fireMapInitializedListeners();
+                (ov, oldState, newState) -> {
+                    if (newState == Worker.State.SUCCEEDED) {
+                        setInitialized(true);
+                        fireMapInitializedListeners();
 
-                        }
                     }
                 });
-        webengine.load(getClass().getResource(htmlFile).toExternalForm());
+        // webengine.load(getClass().getResource(htmlFile).toExternalForm());
 
     }
 
