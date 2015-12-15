@@ -3,142 +3,79 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.scene.text.Font?>
 <Pane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
       minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8"
       fx:controller="main.Controller">
     <children>
-        <SplitPane dividerPositions="0.29797979797979796" prefHeight="400.0" prefWidth="600.0">
-            <items>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+        <AnchorPane prefHeight="398.0" prefWidth="600.0">
+            <children>
+                <VBox prefHeight="398.0" prefWidth="416.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <children>
-                        <VBox prefHeight="398.0" prefWidth="174.0" spacing="5.0" AnchorPane.bottomAnchor="0.0"
-                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <HBox alignment="CENTER_LEFT" prefHeight="65.0" prefWidth="600.0" spacing="5.0">
                             <children>
-                                <Label alignment="CENTER" contentDisplay="CENTER" text="Select device (eth0):"
-                                       textAlignment="CENTER" VBox.vgrow="ALWAYS">
-                                    <VBox.margin>
-                                        <Insets/>
-                                    </VBox.margin>
-                                </Label>
-                                <ListView fx:id="list_devices" prefHeight="398.0" prefWidth="174.0">
-                                    <VBox.margin>
-                                        <Insets/>
-                                    </VBox.margin>
-                                </ListView>
+                                <Label contentDisplay="CENTER" text="Destination IP:"/>
+                                <TextField fx:id="destination_ip" HBox.hgrow="ALWAYS"/>
+                            </children>
+                            <VBox.margin>
+                                <Insets/>
+                            </VBox.margin>
+                            <padding>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                            </padding>
+                        </HBox>
+                        <HBox alignment="CENTER_RIGHT" prefHeight="6.0" prefWidth="600.0">
+                            <children>
+                                <Button fx:id="button_start" alignment="CENTER_RIGHT" contentDisplay="RIGHT"
+                                        mnemonicParsing="false" onAction="#beginTraceroute" text="Start"/>
+                                <Separator prefWidth="200.0" visible="false" HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="button_stop" cancelButton="true" disable="true" mnemonicParsing="false"
+                                        onAction="#stopTraceroute" text="Stop"/>
                             </children>
                             <padding>
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                             </padding>
-                        </VBox>
-                    </children>
-                </AnchorPane>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0"
-                            SplitPane.resizableWithParent="false">
-                    <children>
-                        <VBox prefHeight="398.0" prefWidth="416.0" AnchorPane.bottomAnchor="0.0"
-                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        </HBox>
+                        <ListView fx:id="list_results" prefHeight="335.0" prefWidth="600.0"/>
+                        <Separator prefWidth="200.0"/>
+                        <ProgressBar fx:id="progress" prefHeight="20.0" prefWidth="643.0" progress="0.0">
+                            <VBox.margin>
+                                <Insets left="5.0" right="5.0"/>
+                            </VBox.margin>
+                        </ProgressBar>
+                        <HBox layoutX="10.0" layoutY="161.0" spacing="5.0">
                             <children>
-                                <HBox alignment="CENTER_LEFT" minHeight="37.0" spacing="5.0">
-                                    <children>
-                                        <Label text="Selected device:"/>
-                                        <Label fx:id="selected_device">
-                                            <font>
-                                                <Font name="System Bold" size="13.0"/>
-                                            </font>
-                                        </Label>
-                                    </children>
-                                    <padding>
-                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
-                                    </padding>
-                                </HBox>
-                                <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="10.0" minHeight="37.0"
-                                      spacing="5.0">
-                                    <children>
-                                        <Label text="MAC address:"/>
-                                        <Label fx:id="current_mac_address">
-                                            <font>
-                                                <Font name="System Bold" size="13.0"/>
-                                            </font>
-                                        </Label>
-                                    </children>
-                                    <padding>
-                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
-                                    </padding>
-                                </HBox>
-                                <HBox alignment="CENTER_LEFT" minHeight="37.0" spacing="5.0">
-                                    <children>
-                                        <Label text="Destination IP:"/>
-                                        <Label fx:id="current_ip">
-                                            <font>
-                                                <Font name="System Bold" size="13.0"/>
-                                            </font>
-                                        </Label>
-                                    </children>
-                                    <padding>
-                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
-                                    </padding>
-                                </HBox>
-                                <HBox alignment="CENTER_LEFT" spacing="5.0">
-                                    <children>
-                                        <Label contentDisplay="CENTER" text="Source IP:"/>
-                                        <TextField fx:id="destination_ip" HBox.hgrow="ALWAYS"/>
-                                    </children>
-                                    <VBox.margin>
-                                        <Insets/>
-                                    </VBox.margin>
-                                    <padding>
-                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
-                                    </padding>
-                                </HBox>
-                                <HBox alignment="CENTER_RIGHT">
-                                    <children>
-                                        <Button fx:id="button_start" alignment="CENTER_RIGHT" contentDisplay="RIGHT"
-                                                mnemonicParsing="false" onAction="#beginTraceroute" text="Start"/>
-                                        <Separator prefWidth="200.0" visible="false" HBox.hgrow="ALWAYS"/>
-                                        <Button fx:id="button_stop" cancelButton="true" disable="true"
-                                                mnemonicParsing="false" onAction="#stopTraceroute" text="Stop"/>
-                                    </children>
-                                    <padding>
-                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
-                                    </padding>
-                                </HBox>
-                                <ListView fx:id="list_results" prefHeight="183.0" prefWidth="416.0"/>
-                                <Separator prefWidth="200.0"/>
-                                <HBox layoutX="10.0" layoutY="161.0" spacing="5.0">
-                                    <children>
-                                        <Label alignment="TOP_LEFT" contentDisplay="TOP" maxWidth="50.0" minWidth="50.0"
-                                               text="Status:" HBox.hgrow="NEVER"/>
-                                        <Label fx:id="label_status" wrapText="true">
-                                            <font>
-                                                <Font name="System Bold" size="13.0"/>
-                                            </font>
-                                        </Label>
-                                    </children>
-                                    <padding>
-                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
-                                    </padding>
-                                </HBox>
-                                <Separator layoutX="10.0" layoutY="158.0" prefWidth="200.0"/>
-                                <HBox layoutX="10.0" layoutY="47.0" spacing="5.0">
-                                    <children>
-                                        <Label alignment="TOP_LEFT" contentDisplay="TOP" maxWidth="37.0" minWidth="37.0"
-                                               text="Error:" HBox.hgrow="NEVER"/>
-                                        <Label fx:id="label_errbuf" textFill="RED" wrapText="true" HBox.hgrow="NEVER">
-                                            <font>
-                                                <Font name="System Bold" size="13.0"/>
-                                            </font>
-                                        </Label>
-                                    </children>
-                                    <padding>
-                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
-                                    </padding>
-                                </HBox>
+                                <Label alignment="TOP_LEFT" contentDisplay="TOP" maxWidth="50.0" minWidth="50.0"
+                                       text="Status:" HBox.hgrow="NEVER"/>
+                                <Label fx:id="label_status" wrapText="true">
+                                    <font>
+                                        <Font name="System Bold" size="13.0"/>
+                                    </font>
+                                </Label>
                             </children>
-                        </VBox>
+                            <padding>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                            </padding>
+                        </HBox>
+                        <Separator layoutX="10.0" layoutY="158.0" prefWidth="200.0"/>
+                        <HBox layoutX="10.0" layoutY="47.0" prefHeight="11.0" prefWidth="600.0" spacing="5.0">
+                            <children>
+                                <Label alignment="TOP_LEFT" contentDisplay="TOP" maxWidth="37.0" minWidth="37.0"
+                                       text="Error:" HBox.hgrow="NEVER"/>
+                                <Label fx:id="label_errbuf" textFill="RED" wrapText="true" HBox.hgrow="NEVER">
+                                    <font>
+                                        <Font name="System Bold" size="13.0"/>
+                                    </font>
+                                </Label>
+                            </children>
+                            <padding>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                            </padding>
+                        </HBox>
                     </children>
-                </AnchorPane>
-            </items>
-        </SplitPane>
+                </VBox>
+            </children>
+        </AnchorPane>
     </children>
 </Pane>

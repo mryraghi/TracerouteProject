@@ -1,10 +1,9 @@
-
 import socket
 import struct
 import sys
 
-class Traceroute:
 
+class Traceroute:
     def __init__(self, sysArgs, port=33434, max_hops=30, ttl=1):
         self.dest_name = str(sysArgs[1])
         self.port = port
@@ -22,7 +21,8 @@ class Traceroute:
         return socket.getprotobyname(proto1), socket.getprotobyname(proto2)
 
     def create_sockets(self):
-        return socket.socket(socket.AF_INET, socket.SOCK_RAW, self.icmp), socket.socket(socket.AF_INET, socket.SOCK_DGRAM, self.udp)
+        return socket.socket(socket.AF_INET, socket.SOCK_RAW, self.icmp), socket.socket(socket.AF_INET,
+                                                                                        socket.SOCK_DGRAM, self.udp)
 
     def set_sockets(self):
 
@@ -57,7 +57,7 @@ class Traceroute:
 
         self.timeout = struct.pack("ll", 5, 0)
 
-        while True:
+        while self.ttl < 20:
 
             self.recv_socket, self.send_socket = self.create_sockets()
 
@@ -70,17 +70,17 @@ class Traceroute:
                 self.curr_addr = self.curr_addr[0]
 
                 self.get_hostname()
-            
+
             except socket.error:
                 pass
-            
+
             finally:
                 self.close_sockets()
 
             self.print_curr_hop()
 
             self.ttl += 1
-            
+
             # when to stop
             if self.curr_addr == self.dest_addr or self.ttl > self.max_hops:
                 break
@@ -89,6 +89,3 @@ class Traceroute:
 x = Traceroute(sys.argv)
 
 x.trace()
-
-
-
