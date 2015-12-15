@@ -3,13 +3,13 @@ package main;
 import com.lynden.gmapsfx.GoogleMapView;
 import com.lynden.gmapsfx.MapComponentInitializedListener;
 import com.lynden.gmapsfx.javascript.object.*;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 
@@ -39,13 +39,8 @@ public class Controller implements Initializable, MapComponentInitializedListene
     ProgressBar progress;
     @FXML
     LineChart chart;
-    @FXML
-    NumberAxis yAxis;
-    @FXML
-    NumberAxis xAxis;
+    LineChart.Series<Double, Double> series1;
     private ObservableList<String> traceroute = FXCollections.observableArrayList(); // Dynamic list of nodes
-    private ObservableList<XYChart.Series<Double, Double>> series;
-    private ObservableList<XYChart.Data<Double, Double>> data;
     private Thread t;
 
     @Override
@@ -53,21 +48,15 @@ public class Controller implements Initializable, MapComponentInitializedListene
         // Set content to ListView from the beginning
         list_results.setItems(traceroute);
 
-        series = FXCollections.observableArrayList();
+        ObservableList<XYChart.Series<Double, Double>> lineChartData = FXCollections.observableArrayList();
 
-        data = FXCollections.observableArrayList();
-        data.add(new XYChart.Data<>(0.0, 1.0));
-        data.add(new XYChart.Data<>(1.2, 1.4));
-        data.add(new XYChart.Data<>(2.2, 1.9));
-        data.add(new XYChart.Data<>(2.7, 2.3));
-        data.add(new XYChart.Data<>(2.9, 0.5));
+        series1 = new LineChart.Series<>();
+        series1.setName("Hello Munsell");
 
-        series.add(new XYChart.Series<>("Series1", data));
+        lineChartData.add(series1);
 
-
-        chart = new LineChart<>(xAxis, yAxis, series);
-
-        chart.setData(data);
+        chart.setData(lineChartData);
+        chart.createSymbolsProperty();
 
         mapView = new GoogleMapView(true);
         mapView.addMapInializedListener(this);
@@ -75,6 +64,9 @@ public class Controller implements Initializable, MapComponentInitializedListene
 
     public void beginTraceroute() throws IOException {
         traceroute.removeAll();
+        list_results.getItems().clear();
+        series1.getData().clear();
+
         status("Loading, this can take some time...");
         // Loader
         progress.setProgress(-1.0f);
@@ -95,13 +87,13 @@ public class Controller implements Initializable, MapComponentInitializedListene
                                 traceroute.add(line);
                             }
 
-//                            Platform.runLater(() -> {
-//                                try {
-//                                    stopTraceroute();
-//                                } catch (UnknownHostException | SocketException e) {
-//                                    e.printStackTrace();
-//                                }
-//                            });
+                            Platform.runLater(() -> {
+                                try {
+                                    stopTraceroute();
+                                } catch (UnknownHostException | SocketException e) {
+                                    e.printStackTrace();
+                                }
+                            });
 
                         }
                     } catch (IOException ex) {
@@ -125,6 +117,13 @@ public class Controller implements Initializable, MapComponentInitializedListene
         button_stop.setDisable(true);
         button_start.setDisable(false);
         t.interrupt();
+
+        double i = 5.0;
+        for (String s : traceroute) {
+            series1.getData().add(new XYChart.Data<>(i, 50.0));
+            print(s);
+            i += 5;
+        }
     }
 
     private void print(String s) {
@@ -167,5 +166,9 @@ public class Controller implements Initializable, MapComponentInitializedListene
                 .title("My Marker");
         Marker joeSmithMarker = new Marker(markerOptions1);
         map.addMarker( joeSmithMarker );
+    }
+
+    public void test() {
+        series1.getData().add(new XYChart.Data<Double, Double>(0.0, 1.0));
     }
 }

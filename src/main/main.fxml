@@ -40,10 +40,12 @@
                             <children>
                                 <LineChart fx:id="chart" prefHeight="410.0" prefWidth="551.0">
                                     <xAxis>
-                                        <NumberAxis side="BOTTOM" fx:id="xAxis"/>
+                                        <NumberAxis fx:id="yAxis" forceZeroInRange="false" minorTickVisible="false"
+                                                    side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false"/>
                                     </xAxis>
                                     <yAxis>
-                                        <NumberAxis fx:id="yAxis" side="LEFT" tickLabelsVisible="false"/>
+                                        <NumberAxis forceZeroInRange="false" minorTickVisible="false" side="LEFT"
+                                                    tickLabelsVisible="false" tickMarkVisible="false" fx:id="xAxis"/>
                                     </yAxis>
                                 </LineChart>
                                 <ListView fx:id="list_results" prefHeight="410.0" prefWidth="283.0" />
