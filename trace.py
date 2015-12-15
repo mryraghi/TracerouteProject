@@ -2,8 +2,11 @@
 import socket
 import struct
 import sys
+import requests # external module
 
 class Traceroute:
+
+    FREEGEOPIP_URL = 'http://freegeoip.net/json/'
 
     def __init__(self, sysArgs, port=33434, max_hops=30, ttl=1):
         self.dest_name = str(sysArgs[1])
@@ -22,7 +25,8 @@ class Traceroute:
         return socket.getprotobyname(proto1), socket.getprotobyname(proto2)
 
     def create_sockets(self):
-        return socket.socket(socket.AF_INET, socket.SOCK_RAW, self.icmp), socket.socket(socket.AF_INET, socket.SOCK_DGRAM, self.udp)
+        return socket.socket(socket.AF_INET, socket.SOCK_RAW, self.icmp), socket.socket(socket.AF_INET,
+                                                                                        socket.SOCK_DGRAM, self.udp)
 
     def set_sockets(self):
 
@@ -47,8 +51,9 @@ class Traceroute:
         # manipulating prints
         if self.curr_addr is not None and self.curr_addr != self.last_printed[2]:
             self.hop_number += 1
-            print [self.hop_number, self.curr_name, self.curr_addr]
-            self.last_printed = [self.hop_number, self.curr_name, self.curr_addr]
+            to_print = [self.hop_number, self.curr_name, self.curr_addr, self.get_geolocation_for_ip(self.curr_addr)]
+            print to_print
+            self.last_printed = to_print
 
     def trace(self):
         self.dest_addr = self.get_ip()
@@ -57,7 +62,7 @@ class Traceroute:
 
         self.timeout = struct.pack("ll", 5, 0)
 
-        while True:
+        while self.ttl < 20:
 
             self.recv_socket, self.send_socket = self.create_sockets()
 
@@ -70,25 +75,42 @@ class Traceroute:
                 self.curr_addr = self.curr_addr[0]
 
                 self.get_hostname()
-            
+
             except socket.error:
                 pass
-            
+
             finally:
                 self.close_sockets()
 
             self.print_curr_hop()
 
             self.ttl += 1
-            
+
             # when to stop
             if self.curr_addr == self.dest_addr or self.ttl > self.max_hops:
                 break
+
+    def get_geolocation_for_ip(self, ip):
+ 
+        url = '{}/{}'.format(self.FREEGEOPIP_URL, ip)
+ 
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                json_return = response.json()
+                return json_return['latitude'], json_return['longitude']
+            elif response.status_code == 403:
+                print '403 - forbidden error'
+                sys.exit()
+            else:
+                print 'something went wrong'
+                sys.exit()
+ 
+        except requests.exceptions.ConnectionError:
+            print 'check network connection'
+            sys.exit()
 
 
 x = Traceroute(sys.argv)
 
 x.trace()
-
-
-
