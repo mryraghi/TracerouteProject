@@ -1,76 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.scene.text.*?>
+<?import com.lynden.gmapsfx.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<Pane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-      minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8"
-      fx:controller="main.Controller">
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="591.0" prefWidth="834.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.Controller">
     <children>
-        <AnchorPane prefHeight="398.0" prefWidth="600.0">
+        <AnchorPane prefHeight="591.0" prefWidth="834.0">
             <children>
-                <VBox prefHeight="398.0" prefWidth="416.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <VBox prefHeight="398.0" prefWidth="416.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <children>
                         <HBox alignment="CENTER_LEFT" prefHeight="65.0" prefWidth="600.0" spacing="5.0">
                             <children>
-                                <Label contentDisplay="CENTER" text="Destination IP:"/>
-                                <TextField fx:id="destination_ip" HBox.hgrow="ALWAYS"/>
+                                <Label contentDisplay="CENTER" text="Destination IP:" />
+                                <TextField fx:id="destination_ip" HBox.hgrow="ALWAYS" />
                             </children>
                             <VBox.margin>
-                                <Insets/>
+                                <Insets />
                             </VBox.margin>
                             <padding>
-                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                             </padding>
                         </HBox>
                         <HBox alignment="CENTER_RIGHT" prefHeight="6.0" prefWidth="600.0">
                             <children>
-                                <Button fx:id="button_start" alignment="CENTER_RIGHT" contentDisplay="RIGHT"
-                                        mnemonicParsing="false" onAction="#beginTraceroute" text="Start"/>
-                                <Separator prefWidth="200.0" visible="false" HBox.hgrow="ALWAYS"/>
-                                <Button fx:id="button_stop" cancelButton="true" disable="true" mnemonicParsing="false"
-                                        onAction="#stopTraceroute" text="Stop"/>
+                                <Button fx:id="button_start" alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" onAction="#beginTraceroute" text="Start" />
+                                <Separator prefWidth="200.0" visible="false" HBox.hgrow="ALWAYS" />
+                                <Button fx:id="button_stop" cancelButton="true" disable="true" mnemonicParsing="false" onAction="#stopTraceroute" text="Stop" />
                             </children>
                             <padding>
-                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                             </padding>
                         </HBox>
-                        <ListView fx:id="list_results" prefHeight="335.0" prefWidth="600.0"/>
-                        <Separator prefWidth="200.0"/>
-                        <ProgressBar fx:id="progress" prefHeight="20.0" prefWidth="643.0" progress="0.0">
+                        <HBox alignment="CENTER_RIGHT">
+                            <children>
+                                <GoogleMapView fx:id="mapView" prefHeight="410.0" prefWidth="550.0" />
+                                <ListView fx:id="list_results" prefHeight="410.0" prefWidth="283.0" />
+                            </children>
+                        </HBox>
+                        <Separator prefWidth="200.0" />
+                        <ProgressBar fx:id="progress" prefHeight="20.0" prefWidth="833.0" progress="0.0">
                             <VBox.margin>
-                                <Insets left="5.0" right="5.0"/>
+                                <Insets left="5.0" right="5.0" />
                             </VBox.margin>
                         </ProgressBar>
                         <HBox layoutX="10.0" layoutY="161.0" spacing="5.0">
                             <children>
-                                <Label alignment="TOP_LEFT" contentDisplay="TOP" maxWidth="50.0" minWidth="50.0"
-                                       text="Status:" HBox.hgrow="NEVER"/>
+                                <Label alignment="TOP_LEFT" contentDisplay="TOP" maxWidth="50.0" minWidth="50.0" text="Status:" HBox.hgrow="NEVER" />
                                 <Label fx:id="label_status" wrapText="true">
                                     <font>
-                                        <Font name="System Bold" size="13.0"/>
+                                        <Font name="System Bold" size="13.0" />
                                     </font>
                                 </Label>
                             </children>
                             <padding>
-                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                             </padding>
                         </HBox>
-                        <Separator layoutX="10.0" layoutY="158.0" prefWidth="200.0"/>
+                        <Separator layoutX="10.0" layoutY="158.0" prefWidth="200.0" />
                         <HBox layoutX="10.0" layoutY="47.0" prefHeight="11.0" prefWidth="600.0" spacing="5.0">
                             <children>
-                                <Label alignment="TOP_LEFT" contentDisplay="TOP" maxWidth="37.0" minWidth="37.0"
-                                       text="Error:" HBox.hgrow="NEVER"/>
+                                <Label alignment="TOP_LEFT" contentDisplay="TOP" maxWidth="37.0" minWidth="37.0" text="Error:" HBox.hgrow="NEVER" />
                                 <Label fx:id="label_errbuf" textFill="RED" wrapText="true" HBox.hgrow="NEVER">
                                     <font>
-                                        <Font name="System Bold" size="13.0"/>
+                                        <Font name="System Bold" size="13.0" />
                                     </font>
                                 </Label>
                             </children>
                             <padding>
-                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                             </padding>
                         </HBox>
                     </children>

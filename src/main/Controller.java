@@ -1,5 +1,8 @@
 package main;
 
+import com.lynden.gmapsfx.GoogleMapView;
+import com.lynden.gmapsfx.MapComponentInitializedListener;
+import com.lynden.gmapsfx.javascript.object.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,7 +19,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ResourceBundle;
 
-public class Controller implements Initializable {
+public class Controller implements Initializable, MapComponentInitializedListener {
     @FXML
     TextField destination_ip;
     @FXML
@@ -31,6 +34,8 @@ public class Controller implements Initializable {
     ListView<String> list_results;
     @FXML
     ProgressBar progress;
+    @FXML
+    private GoogleMapView mapView;
 
     private ObservableList<String> traceroute = FXCollections.observableArrayList(); // Dynamic list of nodes
     private Thread t;
@@ -39,7 +44,8 @@ public class Controller implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         // Set content to ListView from the beginning
         list_results.setItems(traceroute);
-
+        mapView = new GoogleMapView();
+        mapView.addMapInializedListener(this);
     }
 
     public void beginTraceroute() throws IOException {
@@ -110,5 +116,31 @@ public class Controller implements Initializable {
 
     private void error() {
         label_errbuf.setText("");
+    }
+
+    @Override
+    public void mapInitialized() {
+        LatLong joeSmithLocation = new LatLong(47.6197, -122.3231);
+        //Set the initial properties of the map.
+        MapOptions mapOptions = new MapOptions();
+
+        mapOptions.center(new LatLong(47.6097, -122.3331))
+//                .mapType(MapType.ROADMAP)
+                .overviewMapControl(false)
+                .panControl(false)
+                .rotateControl(false)
+                .scaleControl(false)
+                .streetViewControl(false)
+                .zoomControl(false)
+                .zoom(12);
+
+        GoogleMap map = mapView.createMap(mapOptions);
+
+        //Add markers to the map
+        MarkerOptions markerOptions1 = new MarkerOptions();
+        markerOptions1.position(joeSmithLocation).visible(Boolean.TRUE)
+                .title("My Marker");
+        Marker joeSmithMarker = new Marker(markerOptions1);
+        map.addMarker( joeSmithMarker );
     }
 }
