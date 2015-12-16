@@ -16,7 +16,7 @@
                     <children>
                         <HBox alignment="CENTER_LEFT" prefHeight="65.0" prefWidth="600.0" spacing="5.0">
                             <children>
-                                <Label contentDisplay="CENTER" text="Destination IP:" />
+                                <Label contentDisplay="CENTER" text="Domain name (eg. google.com): "/>
                                 <TextField fx:id="destination_ip" HBox.hgrow="ALWAYS" />
                             </children>
                             <padding>

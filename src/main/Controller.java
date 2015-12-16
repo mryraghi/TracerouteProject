@@ -219,7 +219,7 @@ public class Controller implements Initializable {
                 "\n" +
                 "        self.timeout = struct.pack(\"ll\", 5, 0)\n" +
                 "\n" +
-                "        while self.ttl < 20:\n" +
+                "        while True:\n" +
                 "\n" +
                 "            self.recv_socket, self.send_socket = self.create_sockets()\n" +
                 "\n" +
