@@ -5,6 +5,7 @@ import sys
 
 class Traceroute:
 
+
     def __init__(self, sysArgs, port=33434, max_hops=30, ttl=1):
         self.dest_name = str(sysArgs[1])
         self.port = port
