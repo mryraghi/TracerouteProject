@@ -3,13 +3,10 @@ import struct
 import sys
 import requests # external module
 
+class Traceroute:
 
-<<<<<<< HEAD
     FREEGEOPIP_URL = 'http://freegeoip.net/json/'
 
-=======
-class Traceroute:
->>>>>>> 02f27d6198ff4f2485699e244de7229ac72f0618
     def __init__(self, sysArgs, port=33434, max_hops=30, ttl=1):
         self.dest_name = str(sysArgs[1])
         self.port = port
