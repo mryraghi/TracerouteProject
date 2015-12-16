@@ -1,28 +1,26 @@
 package main;
 
-import com.lynden.gmapsfx.GoogleMapView;
-import com.lynden.gmapsfx.MapComponentInitializedListener;
-import com.lynden.gmapsfx.javascript.object.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Cursor;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.SocketException;
 import java.net.URL;
-import java.net.UnknownHostException;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
-public class Controller implements Initializable, MapComponentInitializedListener {
-    public GoogleMapView mapView;
+public class Controller implements Initializable {
     @FXML
     TextField destination_ip;
     @FXML
@@ -58,14 +56,13 @@ public class Controller implements Initializable, MapComponentInitializedListene
         chart.setData(lineChartData);
         chart.createSymbolsProperty();
 
-        mapView = new GoogleMapView(true);
-        mapView.addMapInializedListener(this);
     }
 
     public void beginTraceroute() throws IOException {
         traceroute.removeAll();
         list_results.getItems().clear();
         series1.getData().clear();
+        error();
 
         status("Loading, this can take some time...");
         // Loader
@@ -74,30 +71,52 @@ public class Controller implements Initializable, MapComponentInitializedListene
         button_stop.setDisable(false);
         try {
             ProcessBuilder pd = new ProcessBuilder().command("sudo", "python", "trace.py", destination_ip.getText());
+            pd.redirectErrorStream(true);
             Process p = pd.start();
 
             Task task = new Task() {
                 @Override
                 protected Object call() throws Exception {
-                    try {
-                        try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-                            String line;
+                    try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                        String line, message = null;
 
-                            while ((line = in.readLine()) != null) {
+                        while ((line = in.readLine()) != null) {
+                            if (!Objects.equals(line.substring(0, 1), "[")) {
+                                if (Objects.equals(line.substring(0, 9), "Traceback")) {
+                                    message = "Please insert a valid domain name";
+                                } else if (Objects.equals(line.substring(0, 4), "sudo")) {
+                                    message = "Please run this app with sudo privileges!";
+                                } else {
+                                    message = "Unknown error occurred!";
+                                }
+                                break;
+                            } else {
                                 traceroute.add(line);
                             }
-
-                            Platform.runLater(() -> {
-                                try {
-                                    stopTraceroute();
-                                } catch (UnknownHostException | SocketException e) {
-                                    e.printStackTrace();
-                                }
-                            });
-
                         }
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
+
+                        final String finalMessage = message;
+                        Platform.runLater(() -> {
+                            stopTraceroute();
+                            if (finalMessage != null) {
+                                error(finalMessage);
+                                series1.getData().clear();
+                            } else {
+                                double i = 5.0;
+                                int ii = 1;
+                                for (String s : traceroute) {
+                                    double height = Math.random() * 100;
+                                    final XYChart.Data<Double, Double> data = new XYChart.Data<>(i, height);
+                                    String[] output = s.split("'", 5);
+                                    data.setNode(new HoveredThresholdNode(output[3], i));
+                                    series1.getData().add(data);
+                                    i += 5;
+                                    ii++;
+                                }
+                            }
+                        });
+                    } catch (IOException e) {
+                        System.out.print(p.getErrorStream());
                     }
                     return null;
                 }
@@ -111,19 +130,12 @@ public class Controller implements Initializable, MapComponentInitializedListene
         }
     }
 
-    public void stopTraceroute() throws UnknownHostException, SocketException {
+    public void stopTraceroute() {
         status("Connection closed");
         progress.setProgress(0f);
         button_stop.setDisable(true);
         button_start.setDisable(false);
         t.interrupt();
-
-        double i = 5.0;
-        for (String s : traceroute) {
-            series1.getData().add(new XYChart.Data<>(i, 50.0));
-            print(s);
-            i += 5;
-        }
     }
 
     private void print(String s) {
@@ -135,40 +147,45 @@ public class Controller implements Initializable, MapComponentInitializedListene
     }
 
     private void error(String s) {
+        print(s);
         label_errbuf.setText(s);
     }
 
     private void error() {
         label_errbuf.setText("");
     }
+}
 
-    @Override
-    public void mapInitialized() {
-        LatLong joeSmithLocation = new LatLong(47.6197, -122.3231);
-        //Set the initial properties of the map.
-        MapOptions mapOptions = new MapOptions();
+class HoveredThresholdNode extends StackPane {
+    HoveredThresholdNode(String s, double width) {
+        setPrefSize(15, 15);
 
-        mapOptions.center(new LatLong(47.6097, -122.3331))
-//                .mapType(MapType.ROADMAP)
-                .overviewMapControl(false)
-                .panControl(false)
-                .rotateControl(false)
-                .scaleControl(false)
-                .streetViewControl(false)
-                .zoomControl(false)
-                .zoom(12);
+        final Label label = createDataThresholdLabel(s, width);
+        System.out.println(label.getText());
 
-        GoogleMap map = mapView.createMap(mapOptions);
-
-        //Add markers to the map
-        MarkerOptions markerOptions1 = new MarkerOptions();
-        markerOptions1.position(joeSmithLocation).visible(Boolean.TRUE)
-                .title("My Marker");
-        Marker joeSmithMarker = new Marker(markerOptions1);
-        map.addMarker( joeSmithMarker );
+        setOnMouseEntered(mouseEvent -> {
+            getChildren().setAll(label);
+            setCursor(Cursor.NONE);
+            toFront();
+        });
+        setOnMouseExited(mouseEvent -> {
+            getChildren().clear();
+            setCursor(Cursor.CROSSHAIR);
+        });
     }
 
-    public void test() {
-        series1.getData().add(new XYChart.Data<Double, Double>(0.0, 1.0));
+    private Label createDataThresholdLabel(String s, double width) {
+        final Label label = new Label(s);
+        String styles = "-fx-font-size: 15; -fx-font-weight: bold; -fx-background-color: #fff; -fx-padding: 5px; -fx-border-radius: 3px;";
+        if (width > 50) {
+            label.setStyle(styles + " -fx-translate-x: -50px");
+        } else {
+            label.setStyle(styles + " -fx-translate-x: 30px");
+        }
+
+        label.setTextFill(Color.BLACK);
+
+        label.setMinSize(Label.USE_PREF_SIZE, Label.USE_PREF_SIZE);
+        return label;
     }
 }

@@ -19,9 +19,6 @@
                                 <Label contentDisplay="CENTER" text="Destination IP:" />
                                 <TextField fx:id="destination_ip" HBox.hgrow="ALWAYS" />
                             </children>
-                            <VBox.margin>
-                                <Insets />
-                            </VBox.margin>
                             <padding>
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                             </padding>
